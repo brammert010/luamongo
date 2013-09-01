@@ -1,3 +1,8 @@
+#define LUA_COMPAT_MODULE
+#define LUA_COMPAT_ALL
+#include <lua.hpp>
+
+
 #define LUAMONGO_ROOT           "mongo"
 #define LUAMONGO_CONNECTION     "mongo.Connection"
 #define LUAMONGO_REPLICASET     "mongo.ReplicaSet"

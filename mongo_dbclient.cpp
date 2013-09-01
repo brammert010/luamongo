@@ -1,14 +1,5 @@
 #include <client/dbclient.h>
 
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
 #include "utils.h"
 #include "common.h"
 
@@ -28,8 +19,11 @@ DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos)
     // adapted from http://www.lua.org/source/5.1/lauxlib.c.html#luaL_checkudata
     void *ud = lua_touserdata(L, stackpos);
     if (ud == NULL)
-        luaL_typerror(L, stackpos, "userdata");
-
+    {
+        //luaL_typerror(L, stackpos, "userdata");
+        luaL_error(L, "error in userdata");
+    }
+        
     // try Connection
     lua_getfield(L, LUA_REGISTRYINDEX, LUAMONGO_CONNECTION);
     if (lua_getmetatable(L, stackpos))
@@ -60,7 +54,9 @@ DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos)
     else
         lua_pop(L, 1);
 
-    luaL_typerror(L, stackpos, LUAMONGO_DBCLIENT);
+    
+    luaL_error(L, LUAMONGO_DBCLIENT);
+    //luaL_typerror(L, stackpos, LUAMONGO_DBCLIENT);
     return NULL; // should never get here
 }
 
@@ -203,7 +199,7 @@ static int dbclient_insert(lua_State *L) {
         int type = lua_type(L, 3);
         if (type == LUA_TSTRING) {
             const char *jsonstr = luaL_checkstring(L, 3);
-            dbclient->insert(ns, fromjson(jsonstr));
+            dbclient->insert(ns, fromjson(jsonstr), 1);
         } else if (type == LUA_TTABLE) {
             BSONObj data;
             lua_to_bson(L, 3, data);
